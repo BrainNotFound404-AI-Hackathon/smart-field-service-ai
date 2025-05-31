@@ -15,9 +15,3 @@ class Ticket(SQLModel, table=True):
     result: Optional[str] = None
     images: Optional[str] = None  # 建议存json字符串
     ai_suggestion: Optional[str] = None
-
-
-class Record():
-
-
-class Record():
