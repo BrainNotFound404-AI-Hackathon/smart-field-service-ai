@@ -11,7 +11,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain_google_genai import ChatGoogleGenerativeAI
-from server.api.utils import ChatRequest, Message, convert_all_messages
+from server.api.utils import ChatRequest, Message, convert_all_messages , ChatRqst
 from fastapi.responses import JSONResponse
 
 load_dotenv()
@@ -77,9 +77,9 @@ async def stream_chat_response(chain, input_text: str, session_id: str) -> Async
 
 
 @router.post("/lang_chat_stream", tags=["Chat"], summary="LangChain Chat Interface")
-async def lang_chat(request: ChatRequest):
+async def lang_chat(request: ChatRqst):
     session_id = request.session_id or str(uuid4())
-    last_user_input = next((msg.content for msg in reversed(request.messages) if msg.role == "user"), None)
+    last_user_input = request.message
 
     print(f"Session ID: {session_id}, Last User Input: {last_user_input}")
 
