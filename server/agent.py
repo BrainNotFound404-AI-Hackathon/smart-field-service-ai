@@ -14,7 +14,7 @@ Equipment Manual Excerpts:
 {manual}
 
 Please output your response in the following structure:
-1. High-Priority Checks and Error Codes
+1. High-Priority Checks
 2. Recommended Troubleshooting Procedure
 3. Common Pitfalls and Cautions
 4. Relevant Manual References (summary)

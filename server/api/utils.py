@@ -8,7 +8,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     session_id: Optional[str] = None
-    messages: List[Message]
+    messages: str
 
 def convert_langchain_message(msg: BaseMessage) -> Message:
     if isinstance(msg, HumanMessage):
