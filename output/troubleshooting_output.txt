@@ -1,0 +1,46 @@
+## Key Troubleshooting Recommendations - Elevator Skipping 5th Floor (ELV-202-A)
+
+**Ticket ID:** TCKT-20240530-001
+**Elevator ID:** ELV-202-A
+**Location:** Tower B, 5th Floor Lobby
+**Issue:** Elevator fails to stop at the 5th floor and skips to the 6th floor.
+**Priority:** High
+
+**1. High-Priority Checks and Error Codes:**
+
+*   **Landing Door Sensor (5th Floor):** This is the *highest* priority.
+    *   **Check:** Inspect the 5th-floor landing door sensor for proper alignment, obstruction, and damage.
+    *   **Verify:** Confirm the 5th-floor door close status indicator is functioning correctly.
+    *   **Action:** Clean the sensor, adjust alignment, and/or replace if necessary.
+*   **Limit Switch (5th Floor):** Check the position of the limit switch responsible for the 5th floor to see whether it triggers correctly.
+*   **Controller Input Signals:** Use a multimeter to verify that the signal from the 5th-floor landing door sensor and limit switch is correctly received at the elevator controller. Check for loose wiring and corrosion on connectors.
+*   **Error Logs:** Access the elevator control system's error logs to identify any recent error codes related to door sensors, position indicators, or floor selection.
+*   **Software Glitch:** Consider whether there's a software/firmware glitch by restarting the controller.
+
+**2. Recommended Troubleshooting Procedure:**
+
+1.  **Initial Assessment:** Visually inspect the 5th-floor landing door and its surrounding area for any obvious obstructions or damage.
+2.  **Landing Door Sensor Inspection (Manual Ref: 2.1.5):**
+    *   Ensure the sensor is clean and free from debris.
+    *   Verify the sensor is properly aligned with its target.
+    *   Check the wiring and connections to the sensor for any looseness or corrosion.
+    *   Test the sensor's functionality using a multimeter.
+3.  **Limit Switch Assessment:** Visually inspect the limit switch and check whether its position is correct.
+4.  **Signal Verification:** Use a multimeter to check the signal from the 5th-floor sensor/switch at the elevator controller. A missing or incorrect signal indicates a fault with the sensor, wiring, or controller input.
+5.  **Controller Error Log Review:** Access and analyze the elevator controller's error logs. Note any error codes related to door sensors, position indicators, floor selection, or communication errors.
+6.  **Controller Reboot:** Reboot the elevator controller. If this resolves the issue temporarily, it may indicate a software glitch or intermittent hardware problem.
+7.  **Component Isolation:** If the issue persists, systematically isolate components to identify the root cause. For example, temporarily bypass the 5th-floor landing door sensor to see if the elevator then stops correctly (use extreme caution and safety measures when bypassing safety devices).
+8.  **Escalate (If Necessary):** If the problem remains unresolved after these steps, consult with a senior technician or the elevator manufacturer's support team.
+
+**3. Common Pitfalls and Cautions:**
+
+*   **Safety First:** Always prioritize safety when working on elevators. Disconnect power before working on electrical components and use appropriate PPE (Personal Protective Equipment).
+*   **Incorrect Sensor Calibration:** Ensure the landing door sensor is calibrated correctly after any adjustments or replacement. Refer to the manufacturer's specifications for calibration procedures.
+*   **Ignoring Intermittent Issues:** If the problem is intermittent, carefully document the conditions under which it occurs. This information will be helpful for troubleshooting. Review the maintenance history to see if similar issues have occurred previously.
+*   **Lack of Documentation:** Ensure that all work performed is documented, including the date, time, actions taken, and results. This will help with future troubleshooting.
+*   **Jumping to Conclusions:** Avoid assuming the cause of the problem without thorough investigation. Systematically check each potential cause before moving on.
+
+**4. Relevant Manual References (summary):**
+
+*   **Section 2.1.5 (Landing Door Sensor Maintenance):** Provides information on checking landing door sensors for obstructions, misalignment, and signal errors.
+*   **Section 3.2.2 (Power Rail Voltage Diagnostics):** While not directly related to the reported problem, power instability might affect sensor reading.
