@@ -8,7 +8,7 @@ load_dotenv()
 
 # 初始化 LLM
 llm = ChatOpenAI(
-    model="Qwen/Qwen3-32B",
+    model="Qwen/Qwen2.5-32B",
     base_url=os.getenv("CHAT_API_BASE_URL"),
     api_key=os.getenv("CHAT_API_KEY"),
 )
