@@ -14,19 +14,13 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel, Field
+from server.api.utils import ChatRequest, Message, convert_all_messages
 
 load_dotenv()
 
 router = APIRouter()
 
-class Message(BaseModel):
-    role: Literal["system", "user", "assistant"]
-    content: str
 
-class ChatRequest(BaseModel):
-    session_id: Optional[str] = None
-    messages: List[Message]
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash",
@@ -58,16 +52,6 @@ chat_with_memory = RunnableWithMessageHistory(
     history_messages_key="messages",
 )
 
-def convert_messages(messages: List[Message]) -> List[BaseMessage]:
-    result = []
-    for msg in messages:
-        if msg.role == "user":
-            result.append(HumanMessage(content=msg.content))
-        elif msg.role == "system":
-            result.append(SystemMessage(content=msg.content))
-        elif msg.role == "assistant":
-            result.append(AIMessage(content=msg.content))
-    return result
 
 @router.post("/lang_chat", tags=["Chat"], summary="LangChain Chat Interface")
 def lang_chat(request: ChatRequest):
@@ -88,6 +72,9 @@ def lang_chat(request: ChatRequest):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
     print("Response received:", response)
+    print("Chat Memory Messages:", store[session_id].chat_memory.messages)
+    print("Type", type(store[session_id].chat_memory.messages))
+    # Convert messages to the format expected by the API
 
     return JSONResponse(content={"response": response, "session_id": session_id})
 

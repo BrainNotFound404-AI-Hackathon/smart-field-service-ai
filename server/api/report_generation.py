@@ -1,41 +1,92 @@
 #from google import genai
-from google.genai import types
-import google.generativeai as genai
-
+from fastapi import APIRouter
+from server.api.utils import ChatRequest, Message
+from langchain_google_genai import ChatGoogleGenerativeAI
 from pathlib import Path
 import json
+from server.api.chat import lang_chat
+from fastapi.responses import JSONResponse
+from typing import List
+from server.api.chat import store
+from server.api.utils import convert_all_messages
+from server.api.ticket_gateway import get_ticket_by_id
 
-# ✅ 设置 Gemini API Key
-genai.configure(api_key = "AIzaSyBSFs4_X_-T3Ry49JeMMbBs6-LozKGNAIo")
+router = APIRouter()
 
-# ✅ 加载数据
-base_path = Path("data/")
-with open(base_path / "ticket.json", "r", encoding="utf-8") as f:
-    ticket_data = json.load(f)
-with open( "output/troubleshooting_output.txt", "r", encoding="utf-8") as f:
-    troubleshooting_data = f.read()
+def format_messages_to_context(messages: List[Message]) -> str:
+    role_map = {
+        "user": "User",
+        "assistant": "Assistant",
+        "system": "System"
+    }
+    return "\n".join(
+        f"{role_map[msg.role]}: {msg.content}" for msg in messages
+    )
 
-##TODO: Q ^ A query
+@router.post("/report/generation",tags=["report"], summary="Generate Elevator Maintenance Report")
+def report_generation(
+        request: ChatRequest,
+):
+    """
+    生成电梯维修报告的函数
+    """
 
-with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
-    manual_fragments_data = json.load(f)
+    # ✅ 加载数据
+    base_path = Path("data/")
 
-# ✅ 构造 Prompt
-structured_prompt = f"""
-You are now an experienced elevator maintenance AI assistant. Based on the following information, 
-please generate a report for the current issue. 
-The ticket file represents the current issue that are facing. The output should be well-structured, 
-clearly highlight solution procedures, and refer to the manual references and common pitfalls.
+    ticket = get_ticket_by_id(request.session_id)
 
-Ticket Code Information:
-{json.dumps(ticket_data, indent=2)}
+    # with open("output/troubleshooting_output.txt", "r", encoding="utf-8") as f:
+    #     troubleshooting_data = json.load(f)
 
-Recommandation solutions based on the manual file and history repair ticket(closed):
-{json.dumps(troubleshooting_data, indent=2)}
+    ##TODO: Q ^ A message
+    qa_memory = store[request.session_id].chat_memory.messages
+    messages = convert_all_messages(qa_memory)
+    messages_context = format_messages_to_context(messages)
 
-Equipment Manual Excerpts:
-{json.dumps(manual_fragments_data, indent=2)}
+    with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
+        manual_fragments_data = json.load(f)
 
+    # ✅ 构造 Prompt
+    structured_prompt = f"""
+    You are now an experienced elevator maintenance AI assistant. 
+    Below is the previous conversation context:
+    {messages_context}
+    
+    Based on the following information, 
+    please generate a report for the current issue. 
+    The ticket file represents the current issue that are facing. The output should be well-structured, 
+    clearly highlight solution procedures, and refer to the manual references and common pitfalls.
+
+    Ticket Code Information:
+    {ticket}
+
+
+    Equipment Manual Excerpts:
+    {json.dumps(manual_fragments_data, indent=2)}
+
+    generate the report using json format and the content should be as below:
+      ticket_id
+      elevator_id
+      location
+      priority
+      issue_description
+      report 
+        high_priority_checks_and_error_codes
+            component
+            checks
+            related_error_codes
+            component
+            checks
+            related_error_codes
+        recommended_troubleshooting_procedure
+        common_pitfalls_and_cautions
+        relevant_manual_references
+            section
+            title
+            notes
+            all of the component above
+    """
 generate the report using json format and the content should be as below:
 # Report Structure
 Include a JSON object with the following top-level fields:
@@ -75,10 +126,19 @@ Use double quotes for all keys and string values.
 This output format will be consumed by a frontend UI and needs to be strict JSON.
 """
 
-# ✅ 调用 Gemini 模型
-model = genai.GenerativeModel("gemini-2.0-flash")  # 或使用 gemini-1.5-pro
-response = model.generate_content(structured_prompt)
+    # ✅ 调用 LangChain Chat 接口
+    try:
+        response = lang_chat(ChatRequest(
+            messages=[Message(role="user", content=structured_prompt)],
+            session_id=request.session_id
+        ))
+        print(f"Response: {response}")
+    except Exception as e:
+        return {"error": f"LLM 调用失败：{str(e)}"}
 
+    return response
+
+# TODO: 1. 改tikect 状态 2. 关闭上下文
 output_path = Path("output/report.md")  # 你可以自定义文件名和路径
 output_path.parent.mkdir(parents=True, exist_ok=True)  # 创建父目录（如果不存在）
 
