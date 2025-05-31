@@ -73,3 +73,31 @@ async def create_ticket(ticket: Ticket):
         return created_ticket
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/tickets/{ticket_id}", response_model=Ticket)
+async def close_ticket(ticket_id: str):
+    """
+    更新工单信息
+
+    Args:
+        ticket_id (str): 工单ID
+        ticket (Ticket): 更新的工单信息
+
+    Returns:
+        Ticket: 更新后的工单
+
+    Raises:
+        HTTPException: 当工单不存在时抛出404错误
+    """
+    try:
+        ticket_service = TicketService()
+        ticket = ticket_service.get_ticket_by_id(ticket_id)
+        ticket.status = "Closed"
+        updated_ticket = ticket_service.update_ticket(ticket_id, ticket)
+        if not updated_ticket:
+            raise HTTPException(status_code=404, detail=f"工单 {ticket_id} 不存在")
+        return updated_ticket
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
