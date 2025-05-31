@@ -122,8 +122,12 @@ class TicketService:
         Returns:
             Ticket: 创建后的工单
         """
+        ticket.create_time = datetime.now().isoformat()
+        
         # TODO: 实现数据库插入逻辑
-        pass
+        mock_tickets.append(ticket)
+        
+        return ticket
     
     def update_ticket(self, ticket_id: str, ticket: Ticket) -> Ticket:
         """

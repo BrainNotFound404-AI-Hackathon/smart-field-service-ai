@@ -1,14 +1,17 @@
 from typing import List
+from knowledge_base.store import get_retriever
 
-from dotenv import load_dotenv
-from store import vector_store
-
-load_dotenv()
-
-
-"""similarity search from embedding table"""
 def retrieve_by_message(message: str) -> List[str]:
-    retriever = vector_store.as_retriever()
+    """
+    根据消息从知识库中检索相关内容
+    
+    Args:
+        message (str): 查询消息
+        
+    Returns:
+        List[str]: 检索到的相关内容列表
+    """
+    retriever = get_retriever()
     docs = retriever.invoke(message)
     return [doc.page_content for doc in docs]
 
