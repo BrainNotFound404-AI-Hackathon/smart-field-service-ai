@@ -1,9 +1,9 @@
 import os
+from typing import Optional
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain.schema.runnable import RunnablePassthrough
+from pydantic import BaseModel, Field
 
 # 加载环境变量
 load_dotenv()
@@ -22,20 +22,21 @@ def main():
         ("user", "{input}")
     ])
     
-    # 创建输出解析器
-    output_parser = StrOutputParser()
+    # 定义 Joke 结构化输出
+    class Joke(BaseModel):
+        """Joke to tell user."""
+        setup: str = Field(description="The setup of the joke")
+        punchline: str = Field(description="The punchline to the joke")
+        rating: Optional[int] = Field(
+            default=None, description="How funny the joke is, from 1 to 10"
+        )
     
-    # 构建链
-    chain = (
-        {"input": RunnablePassthrough()}
-        | prompt
-        | llm
-        | output_parser
-    )
+    # 使用结构化输出调用 LLM
+    structured_llm = llm.with_structured_output(Joke)
     
-    # 运行链
-    response = chain.invoke("你好，请介绍一下你自己。")
-    print(response)
+    # 使用自定义 prompt 模板
+    joke_response = structured_llm.invoke(prompt.format(input="Tell me a joke about cats"))
+    print("Joke Response:", joke_response)
 
 if __name__ == "__main__":
     main() 
