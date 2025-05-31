@@ -18,3 +18,28 @@ async def get_tickets():
         return tickets
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/tickets/{ticket_id}", response_model=Ticket)
+async def get_ticket_by_id(ticket_id: str):
+    """
+    根据ID获取工单详情
+    
+    Args:
+        ticket_id (str): 工单ID
+        
+    Returns:
+        Ticket: 工单详情
+        
+    Raises:
+        HTTPException: 当工单不存在时抛出404错误
+    """
+    try:
+        ticket_service = TicketService()
+        ticket = ticket_service.get_ticket_by_id(ticket_id)
+        if not ticket:
+            raise HTTPException(status_code=404, detail=f"工单 {ticket_id} 不存在")
+        return ticket
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

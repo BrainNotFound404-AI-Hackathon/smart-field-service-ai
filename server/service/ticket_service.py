@@ -107,9 +107,10 @@ class TicketService:
         Returns:
             Ticket: 工单详情
         """
-        # TODO: 实现数据库查询逻辑
-        
-        pass
+        from server.database.database import Database
+        db = Database()
+        ticket = db.get_ticket_by_id(ticket_id)
+        return ticket
     
     def create_ticket(self, ticket: Ticket) -> Ticket:
         """

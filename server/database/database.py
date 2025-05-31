@@ -18,7 +18,7 @@ class Database:
             session.commit()
 
     # 查询单个
-    def get_ticket(self, ticket_id: str) -> Optional[Ticket]:
+    def get_ticket_by_id(self, ticket_id: str) -> Optional[Ticket]:
         with Session(self.engine) as session:
             return session.get(Ticket, ticket_id)
 
