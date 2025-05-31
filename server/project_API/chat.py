@@ -6,8 +6,15 @@ import requests
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, ChatResult, ChatGeneration
 from langchain_core.runnables import RunnableConfig
+from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ConversationBufferMemory
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.output_parsers import StrOutputParser
+from uuid import uuid4  # 临时 session id 示例
+
 import json
 from pydantic import BaseModel, Field
 import os
@@ -25,6 +32,61 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     messages: List[Message]
 
+
+llm = ChatOpenAI(
+        model="deepseek-ai/deepseek-llm-7b-chat",
+        base_url=os.getenv("OPENAI_API_BASE"),  # 从环境变量读取 API 端点
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+
+# memory & wrapper 构建
+memory = ConversationBufferMemory(return_messages=True)  # 记住对话上下文
+
+
+class Solution(BaseModel):
+    """Solution to the chat request."""
+    solution: str = Field(description="This is a structured solution response.")
+
+    def to_dict(self):
+        return {"solution": self.solution}
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "你是一个严谨的中文助手"),
+    MessagesPlaceholder(variable_name="messages"),
+    ("user", "{input}")
+])
+
+structured_llm = llm.with_structured_output(Solution)
+
+chain = prompt | structured_llm | StrOutputParser(attr_name="solution")
+
+store = {}
+
+class InMemoryHistory(BaseChatMessageHistory, BaseModel):
+    """In memory implementation of chat message history."""
+
+    messages: list[BaseMessage] = Field(default_factory=list)
+
+    def add_messages(self, messages: list[BaseMessage]) -> None:
+        """Add a list of messages to the store"""
+        self.messages.extend(messages)
+
+    def clear(self) -> None:
+        self.messages = []
+
+def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+    if session_id not in store:
+        store[session_id] = InMemoryHistory()
+    return store[session_id]
+
+
+chat_with_memory = RunnableWithMessageHistory(
+    chain,
+    get_by_session_id,  # 获取或创建会话 ID 的消息历史  # 内存缓存（可换成Redis等）
+    input_messages_key="input",  # 和 prompt.format(input=...) 的 key 对应
+    history_messages_key="messages",
+)
+
 @router.post("/lang_chat", tags=["Chat"], summary="LangChain Chat Interface")
 def lang_chat(
     request: ChatRequest,
@@ -35,37 +97,24 @@ def lang_chat(
     """
     # Here you would implement the chat logic
     # For now, we will just return a placeholder response
-    llm = ChatOpenAI(
-        model="deepseek-ai/deepseek-llm-7b-chat",
-        base_url=os.getenv("OPENAI_API_BASE"),  # 从环境变量读取 API 端点
-        api_key=os.getenv("OPENAI_API_KEY")
+
+    session_id = request.session_id if hasattr(request, "session_id") else str(uuid4())
+
+    # 获取用户的最后一条输入
+    last_user_input = next((msg.content for msg in reversed(request.messages) if msg.role == "user"), None)
+    if last_user_input is None:
+        return JSONResponse(status_code=400, content={"error": "No user input found."})
+
+    print(f"Session ID: {session_id}, Last User Input: {last_user_input}")
+
+    response = chat_with_memory.invoke(
+        {"input": last_user_input},
+        config={"configurable": {"session_id": session_id}}
     )
-
-    # 构造 LangChain 消息对象
-    lc_messages = []
-    for msg in request.messages:
-        print(f"Processing message: {msg.role} - {msg.content}")
-        if msg.role in ["system", "user"]:
-            lc_messages.append((msg.role, msg.content))
-        else:
-            return JSONResponse(status_code=400, content={"error": f"Unsupported role: {msg.role}"})
-
-    prompt = ChatPromptTemplate.from_messages(lc_messages)
-
-    class Solution(BaseModel):
-        """Solution to the chat request."""
-        solution: str = Field(description="This is a structured solution response.")
-
-        def to_dict(self):
-            return {"solution": self.solution}
-
-    structured_llm = llm.with_structured_output(Solution)
-
-    response = structured_llm.invoke(prompt.format(input="This is a test input."))
 
     print("Response received:", response)
 
-    return JSONResponse(content={"response": response.to_dict()})
+    return JSONResponse(content={"response": response.to_dict(), "session_id": session_id})
 
 @router.post("/chat", tags=["Chat"], summary="Chat Interface")
 def chat(
