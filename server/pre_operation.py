@@ -1,4 +1,4 @@
-from project_API.prompt_API import run_prompt
+from api.prompt_API import run_prompt
 import sys
 import json
 from pathlib import Path
