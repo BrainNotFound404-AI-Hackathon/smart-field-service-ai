@@ -10,7 +10,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     session_id: Optional[str] = None
-    message: str
+    messages: List[Message] = Field(..., description="聊天消息列表")
 
 
 def convert_langchain_message(msg: BaseMessage) -> Message:

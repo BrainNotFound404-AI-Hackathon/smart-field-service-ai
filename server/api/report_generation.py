@@ -90,7 +90,7 @@ def report_generation(
     # ✅ 调用 LangChain Chat 接口
     try:
         response = lang_chat(ChatRequest(
-            message=structured_prompt,
+            messages=[Message(role="user", content=structured_prompt)],
             session_id=request.session_id
         ))
         print(f"Response: {response}")

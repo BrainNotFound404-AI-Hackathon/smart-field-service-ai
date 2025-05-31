@@ -79,7 +79,7 @@ async def stream_chat_response(chain, input_text: str, session_id: str) -> Async
 @router.post("/lang_chat_stream", tags=["Chat"], summary="LangChain Chat Interface")
 async def lang_chat(request: ChatRequest):
     session_id = request.session_id or str(uuid4())
-    last_user_input = request.message
+    last_user_input = next((msg.content for msg in reversed(request.messages) if msg.role == "user"), None)
 
     print(f"Session ID: {session_id}, Last User Input: {last_user_input}")
 
