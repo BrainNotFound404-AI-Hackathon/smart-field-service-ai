@@ -75,7 +75,8 @@ def report_generation(
             session_id=request.session_id
         ))
         print(f"Response: {response}")
+        print(f"Response Type: {type(response)}")
     except Exception as e:
         return {"error": f"LLM 调用失败：{str(e)}"}
 
-    return {"report": response}
+    return response
