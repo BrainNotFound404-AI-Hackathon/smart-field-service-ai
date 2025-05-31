@@ -35,9 +35,11 @@ def mount_app_routes(app: FastAPI):
     from server.api.chat import router as chat_router
     from server.api.ticket_gateway import router as ticket_gateway_router
     from server.api.clean_up import router as clean_up_router
+    from server.api.report_generation import router as report_generation_router
     app.include_router(chat_router)
     app.include_router(ticket_gateway_router)
     app.include_router(clean_up_router)
+    app.include_router(report_generation_router)
 
 if __name__ == "__main__":
     app = create_app()

@@ -188,8 +188,3 @@ class TicketService:
         except Exception as e:
             print(f"获取模型响应时出错: {e}")
             return []
-
-
-
-# Example usage
-
