@@ -34,7 +34,7 @@ class ChatRequest(BaseModel):
 
 
 llm = ChatOpenAI(
-        model="deepseek-ai/deepseek-llm-7b-chat",
+        model="Qwen/Qwen2.5-32B",
         base_url=os.getenv("OPENAI_API_BASE"),  # 从环境变量读取 API 端点
         api_key=os.getenv("OPENAI_API_KEY")
     )
@@ -51,7 +51,7 @@ class Solution(BaseModel):
         return {"solution": self.solution}
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "你是一个严谨的中文助手"),
+    ("system", "You are a helpful assistant that provides structured solutions to user queries."),
     MessagesPlaceholder(variable_name="messages"),
     ("user", "{input}")
 ])
