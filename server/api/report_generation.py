@@ -49,7 +49,7 @@ def report_generation(
     # ✅ 构造 Prompt
     structured_prompt = f"""
     You are now an experienced elevator maintenance AI assistant. 
-    Below is the previous conversation context:
+    Below is the previous fixing conversation between technician and AI assistant:
     {messages_context}
     
     Based on the following information, 
@@ -60,33 +60,14 @@ def report_generation(
     Ticket Code Information:
     {ticket}
 
-
     Equipment Manual Excerpts:
     {json.dumps(manual_fragments_data, indent=2)}
 
-    generate the report using json format and the content should be as below:
-      ticket_id
-      elevator_id
-      location
-      priority
-      issue_description
-      report 
-        high_priority_checks_and_error_codes
-            component
-            checks
-            related_error_codes
-            component
-            checks
-            related_error_codes
-        recommended_troubleshooting_procedure
-        common_pitfalls_and_cautions
-        relevant_manual_references
-            section
-            title
-            notes
-            all of the component above
+    DO NOT GENERATE the report over 1000 tokens! 
+    The report must follow **strict JSON format**, and should contain only the following two top-level fields:
+- "solutions": a concise list of recommended technical actions.
+- "results": a summary of expected or observed outcomes from applying these solutions.
     """
-
     # ✅ 调用 LangChain Chat 接口
     try:
         response = lang_chat(ChatRequest(
