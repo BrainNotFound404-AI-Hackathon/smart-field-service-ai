@@ -1,261 +1,92 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from langchain_core.language_models.chat_models import BaseChatModel
-from typing import Dict, List, Optional, Iterator, Any, Literal
-import requests
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
-from langchain_core.outputs import ChatGenerationChunk, ChatResult, ChatGeneration
-from langchain_core.runnables import RunnableConfig
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.memory import ConversationBufferMemory
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import InMemoryChatMessageHistory
-from langchain_core.output_parsers import StrOutputParser
-from uuid import uuid4  # 临时 session id 示例
-
+from typing import Dict, List, Optional, Literal
+from uuid import uuid4
 import json
-from pydantic import BaseModel, Field
 import os
 from dotenv import load_dotenv
-load_dotenv()
 
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
+from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import BaseModel, Field
+
+load_dotenv()
 
 router = APIRouter()
 
-
 class Message(BaseModel):
-    role: Literal["system", "user"]
+    role: Literal["system", "user", "assistant"]
     content: str
 
 class ChatRequest(BaseModel):
+    session_id: Optional[str] = None
     messages: List[Message]
 
-
-llm = ChatOpenAI(
-        model="Qwen/Qwen2.5-32B",
-        base_url=os.getenv("OPENAI_API_BASE"),  # 从环境变量读取 API 端点
-        api_key=os.getenv("OPENAI_API_KEY")
-    )
-
-# memory & wrapper 构建
-memory = ConversationBufferMemory(return_messages=True)  # 记住对话上下文
-
-
-class Solution(BaseModel):
-    """Solution to the chat request."""
-    solution: str = Field(description="This is a structured solution response.")
-
-    def to_dict(self):
-        return {"solution": self.solution}
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful assistant that provides structured solutions to user queries."),
+    ("system", "你是一个训练有素的中文 AI 助手，请专注回答用户问题，不要自作扩展或解释。"),
     MessagesPlaceholder(variable_name="messages"),
     ("user", "{input}")
 ])
 
-structured_llm = llm.with_structured_output(Solution)
+chain = prompt | llm | StrOutputParser()
 
-chain = prompt | structured_llm | StrOutputParser(attr_name="solution")
+store: Dict[str, ConversationBufferMemory] = {}
 
-store = {}
-
-class InMemoryHistory(BaseChatMessageHistory, BaseModel):
-    """In memory implementation of chat message history."""
-
-    messages: list[BaseMessage] = Field(default_factory=list)
-
-    def add_messages(self, messages: list[BaseMessage]) -> None:
-        """Add a list of messages to the store"""
-        self.messages.extend(messages)
-
-    def clear(self) -> None:
-        self.messages = []
-
-def get_by_session_id(session_id: str) -> BaseChatMessageHistory:
+def get_memory_by_session(session_id: str) -> BaseChatMessageHistory:
     if session_id not in store:
-        store[session_id] = InMemoryHistory()
-    return store[session_id]
-
+        store[session_id] = ConversationBufferMemory(return_messages=True)
+    return store[session_id].chat_memory
 
 chat_with_memory = RunnableWithMessageHistory(
     chain,
-    get_by_session_id,  # 获取或创建会话 ID 的消息历史  # 内存缓存（可换成Redis等）
-    input_messages_key="input",  # 和 prompt.format(input=...) 的 key 对应
+    get_memory_by_session,
+    input_messages_key="input",
     history_messages_key="messages",
 )
 
+def convert_messages(messages: List[Message]) -> List[BaseMessage]:
+    result = []
+    for msg in messages:
+        if msg.role == "user":
+            result.append(HumanMessage(content=msg.content))
+        elif msg.role == "system":
+            result.append(SystemMessage(content=msg.content))
+        elif msg.role == "assistant":
+            result.append(AIMessage(content=msg.content))
+    return result
+
 @router.post("/lang_chat", tags=["Chat"], summary="LangChain Chat Interface")
-def lang_chat(
-    request: ChatRequest,
-):
-    """
-    LangChain Chat endpoint for handling chat requests.
-    This function will handle the chat logic and return a response.
-    """
-    # Here you would implement the chat logic
-    # For now, we will just return a placeholder response
+def lang_chat(request: ChatRequest):
+    session_id = request.session_id or str(uuid4())
 
-    session_id = request.session_id if hasattr(request, "session_id") else str(uuid4())
-
-    # 获取用户的最后一条输入
     last_user_input = next((msg.content for msg in reversed(request.messages) if msg.role == "user"), None)
     if last_user_input is None:
         return JSONResponse(status_code=400, content={"error": "No user input found."})
 
     print(f"Session ID: {session_id}, Last User Input: {last_user_input}")
-
-    response = chat_with_memory.invoke(
-        {"input": last_user_input},
-        config={"configurable": {"session_id": session_id}}
-    )
+    print("Messages received:", request.messages)
+    try:
+        response = chat_with_memory.invoke(
+            {"input": last_user_input},
+            config={"configurable": {"session_id": session_id}}
+        )
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
     print("Response received:", response)
 
-    return JSONResponse(content={"response": response.to_dict(), "session_id": session_id})
-
-@router.post("/chat", tags=["Chat"], summary="Chat Interface")
-def chat(
-        request: ChatRequest,
-        stream: bool = Query(False),
-        ):
-    """
-    Chat endpoint for handling chat requests.
-    This function will handle the chat logic and return a response.
-    """
-    # Here you would implement the chat logic
-    # For now, we will just return a placeholder response
-
-    model = "deepseek-ai/deepseek-llm-7b-chat"
-    api_url = "https://containers.datacrunch.io/brainnotfound404/v1/chat/completions"
-    inference_key = "dc_161419f95a0e0a7c83d950d8bddf42cc57bbd49345ebf7c56d9b31e220a8d7b8b3a149244058d3c74b11bf137afe0130130e22e59ff7e9e93091772e23ef4f233969c21ffcd7e2498e25c06ccf847a522f544aeb94353b89c114b14825fdc7750608611d7bbd136c0390fab99cf2cfc7522262a281a2411331d9b30f2dccca5d"
-
-    llm = DatacrunchChatModel(
-        api_url=api_url,
-        model=model,
-        inference_key=inference_key,
-        stream_mode=stream
-    )
-
-    # 构造 LangChain 消息对象
-    lc_messages = []
-    for msg in request.messages:
-        print(f"Processing message: {msg.role} - {msg.content}")
-        if msg.role == "system":
-            lc_messages.append(SystemMessage(content=msg.content))
-        elif msg.role == "user":
-            lc_messages.append(HumanMessage(content=msg.content))
-        else:
-            return JSONResponse(status_code=400, content={"error": f"Unsupported role: {msg.role}"})
-        print(lc_messages)
-
-    if stream:
-        output = llm.stream(lc_messages)
-        return JSONResponse(content={"streaming": True, "response": [chunk.message.content for chunk in output]})
-    else:
-        output = llm.generate([lc_messages])
-        return JSONResponse(content={"streaming": False, "response": output.generations[0][0].message.content})
-
-class DatacrunchChatModel(BaseChatModel):
-    api_url: str
-    model: str
-    inference_key: str
-    stream_mode: bool = True
-
-    def _map_role(self, message: BaseMessage) -> str:
-        if isinstance(message, SystemMessage):
-            return "system"
-        elif isinstance(message, HumanMessage):
-            return "user"
-        elif isinstance(message, AIMessage):
-            return "assistant"
-        else:
-            raise ValueError(f"Unsupported message type: {type(message)}")
-
-    def _generate(
-        self,
-        messages: List[BaseMessage],
-        config: Optional[RunnableConfig] = None,
-        **kwargs: Any
-    ) -> ChatResult:
-        headers = {
-            "Authorization": f"Bearer {self.inference_key}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "model": self.model,
-            "messages": [{"role": self._map_role(m), "content": m.content} for m in messages],
-            "stream": False
-        }
-        print(messages)
-
-        resp = requests.post(self.api_url, json=payload, headers=headers)
-        print(resp)
-        content = resp.json()["choices"][0]["message"]["content"]
-        print(f"Response content: {content}")
-        return ChatResult(generations=[ChatGeneration(message=AIMessage(content=content))])
-
-    def _stream(
-        self,
-        input: list,  # Typically List[BaseMessage]
-        config: Optional[RunnableConfig] = None,
-        **kwargs: Any
-    ) -> Iterator[ChatGenerationChunk]:
-        headers = {
-            "Authorization": f"Bearer {self.inference_key}",
-            "Content-Type": "application/json"
-        }
-
-        messages = [{"role": m.type, "content": m.content} for m in input]
-
-
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "stream": True
-        }
-
-        with requests.post(self.api_url, json=payload, headers=headers, stream=True) as resp:
-            for line in resp.iter_lines(decode_unicode=True):
-                if line and line.startswith("data: "):
-                    line_content = line[len("data: "):].strip()
-                    if line_content == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(line_content)
-                        delta = data.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                        if delta:
-                            yield ChatGenerationChunk(message=AIMessage(content=delta))
-                    except Exception as e:
-                        continue  # or log
-    @property
-    def _llm_type(self) -> str:
-        return "custom_streaming_chat"
-
-#
-# llm = DatacrunchChatModel(
-#     api_url="https://containers.datacrunch.io/brainnotfound404/v1/chat/completions",
-#     model="deepseek-ai/deepseek-llm-7b-chat",
-#     inference_key="dc_161419f95a0e0a7c83d950d8bddf42cc57bbd49345ebf7c56d9b31e220a8d7b8b3a149244058d3c74b11bf137afe0130130e22e59ff7e9e93091772e23ef4f233969c21ffcd7e2498e25c06ccf847a522f544aeb94353b89c114b14825fdc7750608611d7bbd136c0390fab99cf2cfc7522262a281a2411331d9b30f2dccca5d",
-# )
-#
-# messages = [
-#     [
-#     SystemMessage(content="You are a helpful writer assistant."),
-#     HumanMessage(content="What is deep learning?")
-#     ]
-# ]
-#
-# optput = llm.generate(messages)
-#
-# print(
-#     "Output received:"
-# )
-# print(optput.generations[0][0].message.content)
-#
-# for chunk in llm.stream(messages[0]):
-#     print("Chunk received:")
-#     print(chunk)
-#     print(chunk.message.content, end="", flush=True)
+    return JSONResponse(content={"response": response, "session_id": session_id})
