@@ -74,8 +74,7 @@ def report_generation(
             messages=[Message(role="user", content=structured_prompt)],
             session_id=request.session_id
         ))
-        print(f"Response: {response}")
-        print(f"Response Type: {type(response)}")
+
     except Exception as e:
         return {"error": f"LLM 调用失败：{str(e)}"}
 
