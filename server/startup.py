@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 
 
-
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Chat API",
@@ -20,9 +19,7 @@ def create_app() -> FastAPI:
 
 def mount_app_routes(app: FastAPI):
     from server.api.chat import router as chat_router
-    app.post("/chat",
-            tags=["Chat"],
-            summary="chat interface")(chat_router)
+    app.include_router(chat_router)
 
 
 if __name__ == "__main__":
