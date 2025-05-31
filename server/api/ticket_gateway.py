@@ -12,10 +12,10 @@ router = APIRouter()
 @router.get("/tickets", response_model=List[Ticket])
 async def get_tickets():
     """
-    获取所有待处理的工单
+    acquire all un-solved ticket
 
     Returns:
-        List[Ticket]: 待处理工单列表
+        List[Ticket]: to-be-solved ticket list
     """
     try:
         ticket_service = TicketService()
@@ -29,16 +29,16 @@ async def get_tickets():
 @router.get("/tickets/{ticket_id}", response_model=Ticket)
 async def get_ticket_by_id(ticket_id: str):
     """
-    根据ID获取工单详情
+    acquire ticket detail according to ID
 
     Args:
-        ticket_id (str): 工单ID
+        ticket_id (str): ticket ID
 
     Returns:
-        Ticket: 工单详情
+        Ticket: ticket information
 
     Raises:
-        HTTPException: 当工单不存在时抛出404错误
+        HTTPException: throw 404 error when ticket in-exist
     """
     try:
         ticket_service = TicketService()
@@ -55,13 +55,13 @@ async def get_ticket_by_id(ticket_id: str):
 @router.post("/tickets", response_model=Ticket)
 async def create_ticket(ticket: Ticket):
     """
-    创建新的工单
+    create new ticket
 
     Args:
-        ticket (Ticket): 工单信息
+        ticket (Ticket): ticket information
 
     Returns:
-        Ticket: 创建后的工单
+        Ticket: created ticket
     """
     try:
         # 使用知识库获取AI建议
@@ -89,17 +89,17 @@ async def similar_find_ticket(ticket_id: str):
 @router.put("/tickets/{ticket_id}", response_model=Ticket)
 async def close_ticket(ticket_id: str):
     """
-    更新工单信息
+    update ticket information
 
     Args:
-        ticket_id (str): 工单ID
-        ticket (Ticket): 更新的工单信息
+        ticket_id (str): ticket ID
+        ticket (Ticket): update ticket information
 
     Returns:
-        Ticket: 更新后的工单
+        Ticket: updated ticket
 
     Raises:
-        HTTPException: 当工单不存在时抛出404错误
+        HTTPException: throw 404 error when ticket in-exist
     """
     try:
         ticket_service = TicketService()
@@ -107,7 +107,7 @@ async def close_ticket(ticket_id: str):
         ticket.status = "Closed"
         updated_ticket = ticket_service.update_ticket(ticket_id, ticket)
         if not updated_ticket:
-            raise HTTPException(status_code=404, detail=f"工单 {ticket_id} 不存在")
+            raise HTTPException(status_code=404, detail=f"ticket {ticket_id} do not exist")
         return updated_ticket
     except HTTPException:
         raise

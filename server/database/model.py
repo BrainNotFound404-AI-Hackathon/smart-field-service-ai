@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, Field
 from typing import Optional
 
 class Ticket(SQLModel, table=True):
-    id: str = Field(primary_key=True, description="工单ID")
+    id: str = Field(primary_key=True, description="ticket ID")
     elevator_id: str
     location: str
     description: str

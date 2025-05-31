@@ -48,26 +48,26 @@ Please output your response in the following structure:
 4. Relevant Manual References (summary)
 """
 
-    # 3. 创建 LLM 实例
+    # 3. create LLM example
     llm = ChatOpenAI(
         model="deepseek-ai/deepseek-llm-7b-chat",
         base_url=os.getenv("CHAT_API_BASE_URL"),
         api_key=os.getenv("CHAT_API_KEY"),
     )
 
-    # 4. 构建消息模板
+    # 4. construct message example
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are an experienced elevator maintenance assistant."),
         ("user", "{input}")
     ])
 
-    # 5. 调用模型
+    # 5. call model
     try:
         result = llm.invoke(prompt.format(input=structured_prompt))
         print("🔧 Troubleshooting Recommendation:\n")
         print(result.content)
     except Exception as e:
-        print("❌ LLM 调用失败：", e)
+        print("❌ LLM call error：", e)
 
 
 if __name__ == "__main__":

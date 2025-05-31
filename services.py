@@ -2,21 +2,21 @@ from typing import List
 from server.model.ticket import Ticket
 
 class TicketService:
-    """工单服务类"""
+    """ticket service class"""
     
     def __init__(self):
-        # 这里可以初始化数据库连接等
+        # here can init data library connect etc.
         pass
     
     def get_pending_tickets(self) -> List[Ticket]:
         """
-        获取所有待处理的工单
+        derive all un-solved ticket
         
         Returns:
-            List[Ticket]: 待处理工单列表
+            List[Ticket]: unsolved ticket list
         """
-        # TODO: 实现数据库查询逻辑
-        # 这里返回示例数据
+        # TODO: realize data library search logic
+        # return example data
         return [
             Ticket(
                 id="T001",

@@ -10,7 +10,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     session_id: Optional[str] = None
-    messages: List[Message] = Field(..., description="聊天消息列表")
+    messages: List[Message] = Field(..., description="message list")
 
 class ChatRqst(BaseModel):
     session_id: Optional[str] = None

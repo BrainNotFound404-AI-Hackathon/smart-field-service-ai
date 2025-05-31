@@ -5,13 +5,13 @@ def main():
         service = TicketService()
         similar_tickets = service.find_similar_tickets()
         
-        print("\n找到的相似工单:")
+        print("\nfind similar ticket:")
         for ticket in similar_tickets:
-            print(f"\n工单ID: {ticket.ticket_id}")
-            print(f"相似度: {ticket.similarity_score:.2f}")
-            print(f"原因: {ticket.reason}")
+            print(f"\nticket ID: {ticket.ticket_id}")
+            print(f"similarity: {ticket.similarity_score:.2f}")
+            print(f"cause: {ticket.reason}")
     except Exception as e:
-        print(f"运行出错: {e}")
+        print(f"run error: {e}")
 
 if __name__ == "__main__":
     main() 

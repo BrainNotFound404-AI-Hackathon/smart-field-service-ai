@@ -31,10 +31,10 @@ def report_generation(
         request: ChatRequest,
 ):
     """
-    生成电梯维修报告的函数
+    generate elevator maintanence report
     """
 
-    # ✅ 加载数据
+    # load data
     base_path = Path("data/")
 
     ticket = get_ticket_by_id(request.session_id)
@@ -46,7 +46,7 @@ def report_generation(
     with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
         manual_fragments_data = json.load(f)
 
-    # ✅ 构造 Prompt
+    # construct Prompt
     structured_prompt = f"""
     You are now an experienced elevator maintenance AI assistant. 
     Below is the previous fixing conversation between technician and AI assistant:
@@ -68,7 +68,7 @@ def report_generation(
 - "solutions": a concise list of recommended technical actions.
 - "results": a summary of expected or observed outcomes from applying these solutions.
     """
-    # ✅ 调用 LangChain Chat 接口
+    # call LangChain Chat API
     try:
         response = lang_chat(ChatRequest(
             messages=[Message(role="user", content=structured_prompt)],
@@ -77,6 +77,6 @@ def report_generation(
         print(f"Response: {response}")
         print(f"Response Type: {type(response)}")
     except Exception as e:
-        return {"error": f"LLM 调用失败：{str(e)}"}
+        return {"error": f"LLM call error：{str(e)}"}
 
     return response
