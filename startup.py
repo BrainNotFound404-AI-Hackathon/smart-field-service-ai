@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from server.ticket_robot import TicketRobot
+
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -24,6 +26,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     mount_app_routes(app)
+
+    TicketRobot()
 
     return app
 
