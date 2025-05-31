@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
-# 加载环境变量
+# load env parameter
 load_dotenv()
 
 def main():
-    # 1. 加载 JSON 数据
+    # 1. load JSON data
     base_path = Path("data/")
     with open(base_path / "alerts.json", "r", encoding="utf-8") as f:
         alerts_data = json.load(f)
@@ -24,7 +24,7 @@ def main():
 #{json.dumps(bug_data, indent=2)}
 # , the bug code represents the error code for each action/situation
 
-    # 2. 格式化 Prompt 模板
+    # 2. format Prompt template
     structured_prompt = f"""
 You are now an experienced elevator maintenance AI assistant. Based on the following information, 
 please generate a "Key Troubleshooting Recommendations" for the current issue. 

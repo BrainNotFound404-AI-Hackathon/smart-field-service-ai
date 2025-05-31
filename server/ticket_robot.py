@@ -14,20 +14,20 @@ class TicketRobot:
         async def check_pending_tickets():
             while True:
                 try:
-                    # 获取所有待处理工单
+                    # Get all pending tickets
                     tickets = await ticket_gateway.get_tickets()
 
-                    # 处理每个待处理工单
+                    # Process each pending ticket
                     for ticket in tickets:
-                        print(f"[{datetime.now()}] 处理工单: {ticket.id}")
-                        # TODO: 在这里添加具体的工单处理逻辑
+                        print(f"[{datetime.now()}] Processing ticket: {ticket.id}")
+                        # TODO: Add specific ticket handling logic here
 
-                    # 等待30秒
+                    # Wait 30 seconds
                     await asyncio.sleep(30)
 
                 except Exception as e:
-                    print(f"处理工单时发生错误: {str(e)}")
+                    print(f"An error occurred while processing tickets: {str(e)}")
                     await asyncio.sleep(30)
 
-        # 启动定时任务
+        # Start the scheduled task
         asyncio.create_task(check_pending_tickets())

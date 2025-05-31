@@ -21,61 +21,61 @@ class TicketService:
             Ticket(
                 id="T001",
                 elevator_id="E001",
-                location="1号楼1单元",
-                description="电梯门无法正常关闭",
+                location="1 building 1 unit",
+                description="elevator door can not close as usual",
                 status="Pending",
                 priority="High",
                 create_time="2024-03-20 10:30:00",
-                ai_suggestion="建议检查门机系统、门锁装置和门机控制器"
+                ai_suggestion="Recommend to check door and electronic system、door lock devices and door controller"
             ),
             Ticket(
                 id="T002",
                 elevator_id="E002",
-                location="2号楼2单元",
-                description="电梯运行时有异常声响",
+                location="2 building 2 unit",
+                description="abnormal sound when elevator is running",
                 status="Pending",
                 priority="Medium",
                 create_time="2024-03-20 11:15:00",
-                ai_suggestion="建议检查曳引机、导轨和导靴"
+                ai_suggestion="It is recommended to inspect the traction machine, guide rails, and guide shoes"
             )
         ]
     
     def get_ticket_by_id(self, ticket_id: str) -> Ticket:
         """
-        根据ID获取工单详情
+        require ticket detail according to ID
         
         Args:
-            ticket_id (str): 工单ID
+            ticket_id (str): ticket ID
             
         Returns:
-            Ticket: 工单详情
+            Ticket: ticket detail
         """
-        # TODO: 实现数据库查询逻辑
+        # TODO: realize data library search logic
         pass
     
     def create_ticket(self, ticket: Ticket) -> Ticket:
         """
-        创建新工单
+        create new ticket
         
         Args:
-            ticket (Ticket): 工单信息
+            ticket (Ticket): ticket information
             
         Returns:
-            Ticket: 创建后的工单
+            Ticket: created ticket
         """
-        # TODO: 实现数据库插入逻辑
+        # TODO: realize data library insert logic
         pass
     
     def update_ticket(self, ticket_id: str, ticket: Ticket) -> Ticket:
         """
-        更新工单信息
+        update ticket information
         
         Args:
-            ticket_id (str): 工单ID
-            ticket (Ticket): 更新的工单信息
+            ticket_id (str): ticket ID
+            ticket (Ticket): information of updated ticket
             
         Returns:
-            Ticket: 更新后的工单
+            Ticket: ticket after updating
         """
-        # TODO: 实现数据库更新逻辑
+        # TODO: realize data library update logic
         pass 

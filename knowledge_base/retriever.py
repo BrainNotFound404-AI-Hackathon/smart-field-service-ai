@@ -3,13 +3,13 @@ from knowledge_base.store import get_retriever
 
 def retrieve_by_message(message: str) -> List[str]:
     """
-    根据消息从知识库中检索相关内容
+    search related content from knowledge base according to the message
     
     Args:
-        message (str): 查询消息
+        message (str): search message
         
     Returns:
-        List[str]: 检索到的相关内容列表
+        List[str]: related content lists that are searched
     """
     retriever = get_retriever()
     docs = retriever.invoke(message)

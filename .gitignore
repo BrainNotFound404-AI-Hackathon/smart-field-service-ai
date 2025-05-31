@@ -8,12 +8,12 @@ dist/
 build/
 .eggs/
 
-# 虚拟环境
+# virtual env
 .venv/
 venv/
 ENV/
 
-# 环境变量
+# env parameter
 .env
 .env.*
 
@@ -26,10 +26,10 @@ ENV/
 # MacOS
 .DS_Store
 
-# 日志
+# log
 *.log
 
-# 单元测试
+# unit test
 htmlcov/
 .tox/
 .nox/

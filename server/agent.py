@@ -39,7 +39,7 @@ def format_docs(docs):
 
 def get_suggestion_assistant():
     """
-    获取当前线程的suggestion assistant实例
+    acquire suggestion assistant instance for current string
     """
     retriever = get_retriever()
     return (

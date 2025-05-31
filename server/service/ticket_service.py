@@ -9,15 +9,15 @@ import os
 from server.database.database import Database
 
 class TicketService:
-    """工单服务类"""
+    """Ticket service class"""
 
     def __init__(self):
-        """初始化工单服务"""
+        """Initialize the ticket service"""
         load_dotenv()
         if "GOOGLE_API_KEY" not in os.environ:
             raise ValueError("GOOGLE_API_KEY environment variable is not set")
 
-        # 初始化示例数据
+        # Initialize example data
         self.current = Ticket(
             id="N1",
             elevator_id="E100",
@@ -26,10 +26,10 @@ class TicketService:
             status="Pending",
             priority="High",
             create_time=datetime.now().isoformat(),
-            ai_suggestion="建议检查门机系统、门锁装置和门机控制器"
+            ai_suggestion="Check door operator system, door lock, and door controller"
         )
 
-        # 初始化AI模型
+        # Initialize AI model
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash",
             temperature=0,
@@ -38,7 +38,7 @@ class TicketService:
         self.structured_llm = self.llm.with_structured_output(SimilarTicketsResponse)
 
     def _format_ticket_info(self, ticket: Ticket) -> str:
-        """格式化工单信息为字符串"""
+        """Format ticket information into a string"""
         return f"""ID: {ticket.id}
         Elevator: {ticket.elevator_id}
         Location: {ticket.location}
@@ -56,10 +56,10 @@ class TicketService:
 
     def get_pending_tickets(self) -> List[Ticket]:
         """
-        获取所有待处理的工单
+        Retrieve all pending tickets
 
         Returns:
-            List[Ticket]: 待处理工单列表
+            List[Ticket]: List of pending tickets
         """
         db = Database()
         tickets = db.list_tickets()
@@ -67,13 +67,13 @@ class TicketService:
 
     def get_ticket_by_id(self, ticket_id: str) -> Ticket:
         """
-        根据ID获取工单详情
+        Retrieve ticket details by ID
 
         Args:
-            ticket_id (str): 工单ID
+            ticket_id (str): Ticket ID
 
         Returns:
-            Ticket: 工单详情
+            Ticket: Ticket details
         """
         db = Database()
         ticket = db.get_ticket_by_id(ticket_id)
@@ -81,13 +81,13 @@ class TicketService:
 
     def create_ticket(self, ticket: Ticket) -> Ticket:
         """
-        创建新工单
+        Create a new ticket
 
         Args:
-            ticket (Ticket): 工单信息
+            ticket (Ticket): Ticket information
 
         Returns:
-            Ticket: 创建后的工单
+            Ticket: Created ticket
         """
         ticket_dict = ticket.dict()
         if ticket_dict.get("images"):
@@ -101,14 +101,14 @@ class TicketService:
 
     def update_ticket(self, ticket_id: str, ticket: Ticket) -> Ticket:
         """
-        更新工单信息
+        Update ticket information
 
         Args:
-            ticket_id (str): 工单ID
-            ticket (Ticket): 更新的工单信息
+            ticket_id (str): Ticket ID
+            ticket (Ticket): Updated ticket info
 
         Returns:
-            Ticket: 更新后的工单
+            Ticket: Updated ticket
         """
         db = Database()
         db.update_ticket(ticket_id, ticket.model_dump())
@@ -117,14 +117,14 @@ class TicketService:
 
     def find_similar_tickets(self, current_ticket: Ticket = None, max_results: int = 2) -> List[SimilarTicket]:
         """
-        查找与当前工单相似的历史工单
+        Find historical tickets similar to the current ticket
 
         Args:
-            current_ticket: 当前工单，如果为None则使用self.current
-            max_results: 返回的最大相似工单数量
+            current_ticket: Current ticket (uses self.current if None)
+            max_results: Maximum number of similar tickets to return
 
         Returns:
-            List[SimilarTicket]: 相似工单列表，按相似度降序排序
+            List[SimilarTicket]: List of similar tickets, sorted by similarity score (descending)
         """
         current_ticket = current_ticket or self.current
 
@@ -137,30 +137,30 @@ class TicketService:
             for t in historical_ticket
         ])
 
-        # 创建提示词
-        prompt = f"""你是一个专门用于查找相似电梯维护工单的AI助手。
-            请分析以下当前工单和历史工单，找出最相似的工单。
-            考虑以下相似性因素：
-            1. 相同电梯或位置
-            2. 相似的问题类型
-            3. 相似的故障描述
-            4. 可能相关的历史解决方案
-            5. 相似的优先级
-            6. 可能相关的AI建议
+        # Construct prompt
+        prompt = f"""You are an AI assistant specialized in identifying similar elevator maintenance tickets.
+            Please analyze the current ticket and historical tickets below and find the most similar ones.
+            Consider the following similarity factors:
+            1. Same elevator or location
+            2. Similar issue type
+            3. Similar fault description
+            4. Related past solutions
+            5. Similar priority level
+            6. Related AI suggestions
 
-            当前工单：
+            Current ticket:
             {current_ticket_info}
 
-            历史工单：
+            Historical tickets:
             {historical_tickets_info}
 
-            请返回{max_results}个最相似的工单，按相似度降序排序。
+            Please return {max_results} most similar tickets, sorted in descending order of similarity.
             """
 
         try:
-            # 获取结构化响应
+            # Get structured response
             response = self.structured_llm.invoke(prompt)
             return response.similar_tickets[:max_results]
         except Exception as e:
-            print(f"获取模型响应时出错: {e}")
+            print(f"Error getting model response: {e}")
             return []
