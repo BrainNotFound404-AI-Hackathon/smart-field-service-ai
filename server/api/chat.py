@@ -85,11 +85,14 @@ async def lang_chat(request: ChatRqst):
 
     pages = retrieve_by_message(last_user_input)
 
-    print(pages)
+    last_user_input = f"""[User Input]
+    {request.message}
 
-    last_user_input += "\n\n" + "\n".join(pages)
-    print(last_user_input)
-    print(f"Session ID: {session_id}, Last User Input: {last_user_input}")
+    [Retrieved Context]
+    {chr(10).join(pages)}
+
+    [Instruction]
+    Please answer the question based on the user input and retrieved context."""
 
     return StreamingResponse(
         stream_chat_response(chat_with_memory, last_user_input, session_id),
