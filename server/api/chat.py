@@ -6,8 +6,14 @@ import requests
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, ChatResult, ChatGeneration
 from langchain_core.runnables import RunnableConfig
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate
 import json
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 router = APIRouter()
 
@@ -18,6 +24,48 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[Message]
+
+@router.post("/lang_chat", tags=["Chat"], summary="LangChain Chat Interface")
+def lang_chat(
+    request: ChatRequest,
+):
+    """
+    LangChain Chat endpoint for handling chat requests.
+    This function will handle the chat logic and return a response.
+    """
+    # Here you would implement the chat logic
+    # For now, we will just return a placeholder response
+    llm = ChatOpenAI(
+        model="deepseek-ai/deepseek-llm-7b-chat",
+        base_url=os.getenv("OPENAI_API_BASE"),  # 从环境变量读取 API 端点
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+
+    # 构造 LangChain 消息对象
+    lc_messages = []
+    for msg in request.messages:
+        print(f"Processing message: {msg.role} - {msg.content}")
+        if msg.role in ["system", "user"]:
+            lc_messages.append((msg.role, msg.content))
+        else:
+            return JSONResponse(status_code=400, content={"error": f"Unsupported role: {msg.role}"})
+
+    prompt = ChatPromptTemplate.from_messages(lc_messages)
+
+    class Solution(BaseModel):
+        """Solution to the chat request."""
+        solution: str = Field(description="This is a structured solution response.")
+
+        def to_dict(self):
+            return {"solution": self.solution}
+
+    structured_llm = llm.with_structured_output(Solution)
+
+    response = structured_llm.invoke(prompt.format(input="This is a test input."))
+
+    print("Response received:", response)
+
+    return JSONResponse(content={"response": response.to_dict()})
 
 @router.post("/chat", tags=["Chat"], summary="Chat Interface")
 def chat(
@@ -53,14 +101,13 @@ def chat(
         else:
             return JSONResponse(status_code=400, content={"error": f"Unsupported role: {msg.role}"})
         print(lc_messages)
+
     if stream:
         output = llm.stream(lc_messages)
         return JSONResponse(content={"streaming": True, "response": [chunk.message.content for chunk in output]})
     else:
         output = llm.generate([lc_messages])
         return JSONResponse(content={"streaming": False, "response": output.generations[0][0].message.content})
-
-
 
 class DatacrunchChatModel(BaseChatModel):
     api_url: str
