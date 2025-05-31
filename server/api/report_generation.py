@@ -4,12 +4,14 @@ from server.api.utils import ChatRequest, Message
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pathlib import Path
 import json
-from server.api.chat import lang_chat
+from server.api.chat import lang_chat, stream_chat_response
 from fastapi.responses import JSONResponse
 from typing import List
 from server.api.chat import store
 from server.api.utils import convert_all_messages
 from server.api.ticket_gateway import get_ticket_by_id
+import httpx
+import asyncio
 
 router = APIRouter()
 
@@ -22,6 +24,7 @@ def format_messages_to_context(messages: List[Message]) -> str:
     return "\n".join(
         f"{role_map[msg.role]}: {msg.content}" for msg in messages
     )
+
 
 @router.post("/report/generation",tags=["report"], summary="Generate Elevator Maintenance Report")
 def report_generation(
@@ -98,6 +101,6 @@ def report_generation(
     except Exception as e:
         return {"error": f"LLM 调用失败：{str(e)}"}
 
-    return response
+    return {"report": response}
 
 # TODO: 1. 改tikect 状态 2. 关闭上下文

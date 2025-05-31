@@ -12,6 +12,7 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain_google_genai import ChatGoogleGenerativeAI
 from server.api.utils import ChatRequest, Message, convert_all_messages
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
@@ -75,7 +76,7 @@ async def stream_chat_response(chain, input_text: str, session_id: str) -> Async
         raise e
 
 
-@router.post("/lang_chat", tags=["Chat"], summary="LangChain Chat Interface")
+@router.post("/lang_chat_stream", tags=["Chat"], summary="LangChain Chat Interface")
 async def lang_chat(request: ChatRequest):
     session_id = request.session_id or str(uuid4())
     last_user_input = request.message
@@ -86,3 +87,22 @@ async def lang_chat(request: ChatRequest):
         stream_chat_response(chat_with_memory, last_user_input, session_id),
         media_type="text/event-stream"
     )
+
+@router.post("/lang_chat", tags=["Chat"], summary="Chat Interface")
+def lang_chat(request: ChatRequest):
+    session_id = request.session_id or str(uuid4())
+
+    last_user_input = next((msg.content for msg in reversed(request.messages) if msg.role == "user"), None)
+    if last_user_input is None:
+        return JSONResponse(status_code=400, content={"error": "No user input found."})
+
+    try:
+        response = chat_with_memory.invoke(
+            {"input": last_user_input},
+            config={"configurable": {"session_id": session_id}}
+        )
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+    return JSONResponse(content={"response": response, "session_id": session_id})
+
