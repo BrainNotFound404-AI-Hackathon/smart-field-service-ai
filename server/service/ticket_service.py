@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic.v1 import BaseModel, Field
 import os
-
+from server.database.database import Database
 
 class TicketService:
     """工单服务类"""
@@ -92,7 +92,6 @@ class TicketService:
         Returns:
             List[Ticket]: 待处理工单列表
         """
-        from server.database.database import Database
         db = Database()
         tickets = db.list_tickets()
         return [t for t in tickets if t.status == "Pending"]
@@ -107,7 +106,6 @@ class TicketService:
         Returns:
             Ticket: 工单详情
         """
-        from server.database.database import Database
         db = Database()
         ticket = db.get_ticket_by_id(ticket_id)
         return ticket
@@ -123,10 +121,8 @@ class TicketService:
             Ticket: 创建后的工单
         """
         ticket.create_time = datetime.now().isoformat()
-        
-        # TODO: 实现数据库插入逻辑
-        mock_tickets.append(ticket)
-        
+        db = Database()
+        db.add_ticket(ticket)
         return ticket
     
     def update_ticket(self, ticket_id: str, ticket: Ticket) -> Ticket:
@@ -140,8 +136,9 @@ class TicketService:
         Returns:
             Ticket: 更新后的工单
         """
-        # TODO: 实现数据库更新逻辑
-        pass
+        db = Database()
+        db.update_ticket(ticket_id, ticket.model_dump())
+        return ticket
     
     
     def find_similar_tickets(self, current_ticket: Ticket = None, max_results: int = 3) -> List[SimilarTicket]:
