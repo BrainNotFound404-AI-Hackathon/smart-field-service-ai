@@ -39,10 +39,6 @@ def report_generation(
 
     ticket = get_ticket_by_id(request.session_id)
 
-    # with open("output/troubleshooting_output.txt", "r", encoding="utf-8") as f:
-    #     troubleshooting_data = json.load(f)
-
-    ##TODO: Q ^ A message
     qa_memory = store[request.session_id].chat_memory.messages
     messages = convert_all_messages(qa_memory)
     messages_context = format_messages_to_context(messages)
@@ -102,5 +98,3 @@ def report_generation(
         return {"error": f"LLM 调用失败：{str(e)}"}
 
     return {"report": response}
-
-# TODO: 1. 改tikect 状态 2. 关闭上下文
