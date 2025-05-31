@@ -10,7 +10,7 @@ mock_tickets = [
                     description="Elevator door cannot close properly",
                     status="Pending",
                     priority="High",
-                    create_time=datetime.now()
+                    create_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ),
                 Ticket(
                     id="T002",
@@ -19,7 +19,7 @@ mock_tickets = [
                     description="Abnormal noise during elevator operation",
                     status="Pending",
                     priority="Medium",
-                    create_time=datetime.now()
+                    create_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 ),
                 Ticket(
                     id="T003",
@@ -28,6 +28,6 @@ mock_tickets = [
                     description="Elevator display screen not working",
                     status="Pending",
                     priority="Low",
-                    create_time=datetime.now()
+                    create_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 )
             ]

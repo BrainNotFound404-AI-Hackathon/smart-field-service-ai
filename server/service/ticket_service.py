@@ -1,7 +1,6 @@
 from typing import List
 from datetime import datetime
 from server.model.ticket import Ticket
-from server.service import mock_tickets
 
 class TicketService:
     """工单服务类"""
@@ -17,9 +16,10 @@ class TicketService:
         Returns:
             List[Ticket]: 待处理工单列表
         """
-        # TODO: 实现数据库查询逻辑
-        # 这里返回示例数据
-        return mock_tickets
+        from server.database.database import Database
+        db = Database()
+        tickets = db.list_tickets()
+        return [t for t in tickets if t.status == "Pending"]
     
     def get_ticket_by_id(self, ticket_id: str) -> Ticket:
         """

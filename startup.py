@@ -19,12 +19,15 @@ def create_app() -> FastAPI:
 
 def mount_app_routes(app: FastAPI):
     from server.api.chat import router as chat_router
+    from server.api.ticket_gateway import router as ticket_gateway_router
     app.include_router(chat_router)
+    app.include_router(ticket_gateway_router)
 
 if __name__ == "__main__":
     app = create_app()
 
     import uvicorn
 
-    uvicorn.run(app, host='172.25.208.1', port=8000)
+    uvicorn.run(app, port=8000)
+
 
