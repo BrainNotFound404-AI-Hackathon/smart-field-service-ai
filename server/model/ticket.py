@@ -17,5 +17,12 @@ class Ticket(BaseModel):
     images: Optional[List[str]] = Field(default=None, description="相关图片URL数组")
     ai_suggestion: Optional[str] = Field(default=None, description="AI生成的重点排查建议")
 
-    class Config:
-        arbitrary_types_allowed = True
+class SimilarTicket(BaseModel):
+    """Structure for similar ticket response."""
+    ticket_id: str = Field(..., description="The ID of the similar ticket")
+    similarity_score: float = Field(..., description="Similarity score between 0 and 1")
+    reason: str = Field(..., description="Brief explanation of why this ticket is similar")
+
+class SimilarTicketsResponse(BaseModel):
+    """Response containing a list of similar tickets."""
+    similar_tickets: List[SimilarTicket] = Field(..., description="List of similar tickets")
