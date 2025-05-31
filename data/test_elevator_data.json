@@ -1,0 +1,68 @@
+[
+  {
+    "timestamp": "2025-05-31T13:42:25Z",
+    "status": "idle",
+    "environment": {
+      "temperature_c": 24.86,
+      "humidity_percent": 69.19
+    },
+    "sensors": {
+      "vibration_rms": 0.689,
+      "motor_current_a": 21.75,
+      "car_load_kg": 599.8,
+      "acceleration_m_s2": 0.0
+    },
+    "fault_codes": [
+      101
+    ]
+  },
+  {
+    "timestamp": "2025-05-30T07:06:01Z",
+    "status": "moving_up",
+    "environment": {
+      "temperature_c": 24.98,
+      "humidity_percent": 55.53
+    },
+    "sensors": {
+      "vibration_rms": 1.324,
+      "motor_current_a": 111.74,
+      "car_load_kg": 758.8,
+      "acceleration_m_s2": -0.464
+    },
+    "fault_codes": [
+      201
+    ]
+  },
+  {
+    "timestamp": "2025-06-01T13:35:12Z",
+    "status": "idle",
+    "environment": {
+      "temperature_c": 23.49,
+      "humidity_percent": 52.64
+    },
+    "sensors": {
+      "vibration_rms": 2.77,
+      "motor_current_a": 62.91,
+      "car_load_kg": 1009.4,
+      "acceleration_m_s2": 0.0
+    },
+    "fault_codes": [
+      301
+    ]
+  },
+  {
+    "timestamp": "2025-05-25T12:04:24Z",
+    "status": "moving_down",
+    "environment": {
+      "temperature_c": 20.77,
+      "humidity_percent": 46.75
+    },
+    "sensors": {
+      "vibration_rms": 0.824,
+      "motor_current_a": 11.82,
+      "car_load_kg": 58.3,
+      "acceleration_m_s2": 0.0
+    },
+    "fault_codes": []
+  }
+]
