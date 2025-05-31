@@ -28,7 +28,7 @@ llm = ChatGoogleGenerativeAI(
 )
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", "你是一个训练有素的中文 AI 助手，请专注回答用户问题，不要自作扩展或解释。"),
+    ("system", "You are a professional elevator maintenance AI assistant. Your role is to provide accurate and concise answers about elevator maintenance, troubleshooting, and safety procedures. Focus on answering questions directly without unnecessary elaboration. Use technical terminology appropriately and maintain a professional tone."),
     MessagesPlaceholder(variable_name="messages"),
     ("user", "{input}")
 ])
