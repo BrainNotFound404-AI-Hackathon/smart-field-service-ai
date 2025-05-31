@@ -1,3 +1,6 @@
+import os
+import sys
+
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import SQLiteVec
 import sqlite3
@@ -10,7 +13,7 @@ load_dotenv()
 def get_vector_store():
     gemini_embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-    connection = sqlite3.connect("../data/fix-wise.db", check_same_thread=False)
+    connection = sqlite3.connect(f"{os.path.dirname(sys.argv[0])}/data/fix-wise.db", check_same_thread=False)
     connection.row_factory = sqlite3.Row
     connection.enable_load_extension(True)
     sqlite_vec.load(connection)

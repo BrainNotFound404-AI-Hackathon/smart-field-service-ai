@@ -1,14 +1,14 @@
-
+import os
+import sys
 from datetime import datetime
 from sqlmodel import SQLModel, create_engine, Session, select
 from typing import Optional, List
-import json
 
-from server.database.model import Ticket    
+from server.database.model import Ticket
 
 class Database:
 
-    def __init__(self, db_url: str = "sqlite:///./data/fix-wise.db"):
+    def __init__(self, db_url: str = f"sqlite:///{os.path.dirname(sys.argv[0])}/data/fix-wise.db"):
         self.engine = create_engine(db_url)
         SQLModel.metadata.create_all(self.engine)
 

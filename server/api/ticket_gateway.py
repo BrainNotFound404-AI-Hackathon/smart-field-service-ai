@@ -74,6 +74,18 @@ async def create_ticket(ticket: Ticket):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/tickets/similar/{ticket_id}", response_model=List[Ticket])
+async def similar_find_ticket(ticket_id: str):
+    try:
+        ticket_service = TicketService()
+        ticket = ticket_service.get_ticket_by_id(ticket_id)
+        similar_tickets = ticket_service.find_similar_tickets(ticket)
+        print(similar_tickets)
+        tickets = [ticket_service.get_ticket_by_id(st.ticket_id) for st in similar_tickets]
+        return tickets
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.put("/tickets/{ticket_id}", response_model=Ticket)
 async def close_ticket(ticket_id: str):
     """
