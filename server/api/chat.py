@@ -90,3 +90,5 @@ def lang_chat(request: ChatRequest):
     print("Response received:", response)
 
     return JSONResponse(content={"response": response, "session_id": session_id})
+
+

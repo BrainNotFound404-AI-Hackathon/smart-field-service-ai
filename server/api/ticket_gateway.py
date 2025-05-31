@@ -25,6 +25,7 @@ async def get_tickets():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
 @router.get("/tickets/{ticket_id}", response_model=Ticket)
 async def get_ticket_by_id(ticket_id: str):
     """
