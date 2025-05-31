@@ -1,0 +1,30 @@
+[
+  {
+    "ticket_id": "TK20240501",
+    "device_id": "ELV-G23",
+    "date": "2024-05-01",
+    "reported_issue": "Elevator cannot stop at 2nd floor and makes strange noise",
+    "actions_taken": [
+      "Checked landing door sensor",
+      "Adjusted limit switch position",
+      "Replaced control board module"
+    ],
+    "result": "Elevator returned to normal operation",
+    "technician": "Li Gong",
+    "duration_minutes": 45
+  },
+  {
+    "ticket_id": "TK20240428",
+    "device_id": "ELV-G23",
+    "date": "2024-04-28",
+    "reported_issue": "Elevator vibrates significantly and starts slowly",
+    "actions_taken": [
+      "Replaced traction belt",
+      "Tightened traction machine mounting bolts",
+      "Checked current and voltage fluctuation"
+    ],
+    "result": "Issue partially resolved, recommended continued observation",
+    "technician": "Wang Ming",
+    "duration_minutes": 60
+  }
+]

@@ -1,0 +1,48 @@
+[
+  {
+    "section_id": "3.2.1",
+    "title": "HMI Display Intermittent Reboot Troubleshooting",
+    "content": "If the cabin display panel turns off and reboots intermittently, first check the power supply stability to the HMI unit. Loose connectors, fluctuating voltage, or firmware corruption may be the root causes. Re-seat all connectors firmly. If issue persists, replace the HMI module.",
+    "related_keywords": [
+      "HMI",
+      "display reboot",
+      "cabin panel",
+      "firmware",
+      "power stability"
+    ]
+  },
+  {
+    "section_id": "3.2.2",
+    "title": "Power Rail Voltage Diagnostics",
+    "content": "Power instability during load transitions can lead to component reboot or communication glitches. Use a digital oscilloscope or multimeter to verify voltage consistency on the +24V and +12V lines under full elevator load. Shielding cable replacement may improve power integrity.",
+    "related_keywords": [
+      "power rail",
+      "voltage drop",
+      "load transition",
+      "power fluctuation",
+      "shielding"
+    ]
+  },
+  {
+    "section_id": "5.4.7",
+    "title": "Audio Announcement System Check",
+    "content": "If audio announcements fail during display reboots, check shared power and communication paths between HMI and the speaker controller. Inspect logs and verify firmware integrity. Ensure the speaker board firmware is compatible with the HMI firmware version.",
+    "related_keywords": [
+      "audio system",
+      "announcement failure",
+      "firmware compatibility",
+      "HMI reboot",
+      "shared power"
+    ]
+  },
+  {
+    "section_id": "2.1.5",
+    "title": "Landing Door Sensor Maintenance",
+    "content": "Landing door not closing may be caused by obstruction, magnetic sensor misalignment, or control board signal error. It is recommended to check each door\u2019s close status indicator.",
+    "related_keywords": [
+      "landing door",
+      "sensor",
+      "close indicator"
+    ]
+  }
+]

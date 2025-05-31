@@ -1,0 +1,28 @@
+[
+  {
+    "description": "Communication interruption",
+    "possible_causes": [
+      "Main board and sub-board communication failure",
+      "Loose or disconnected signal cable",
+      "Signal frame loss due to electromagnetic interference"
+    ],
+    "recommendations": [
+      "Check signal cable connection in the control cabinet",
+      "Use a multimeter to test voltage on the communication line",
+      "Re-plug connectors and restart the system"
+    ]
+  },
+  {
+    "description": "Landing door not closed",
+    "possible_causes": [
+      "Damaged or misaligned door sensor",
+      "Foreign object stuck in door track",
+      "No signal received by controller from door sensor"
+    ],
+    "recommendations": [
+      "Check for obstructions in the door track",
+      "Manually close the door and observe sensor light",
+      "Inspect sensor alignment and cable connections"
+    ]
+  }
+]
