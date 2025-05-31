@@ -1,0 +1,11 @@
+[
+ {
+  "id": "TCKT-20240530-001",
+  "elevatorId": "ELV-202-A",
+  "location": "Tower B, 5th Floor Lobby",
+  "description": "Elevator fails to stop at the 5th floor and skips to the 6th floor.",
+  "status": "Pending",
+  "priority": "High",
+  "createTime": "2025-05-30T10:15:00Z"
+ }
+]
