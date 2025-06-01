@@ -12,8 +12,21 @@ from server.api.utils import convert_all_messages
 from server.api.ticket_gateway import get_ticket_by_id
 import httpx
 import asyncio
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+import os
+
+from server.service.ticket_service import TicketService
+
+# 加载环境变量
+load_dotenv()
 
 router = APIRouter()
+
+class MaintenanceReport(BaseModel):
+    """维护报告结构"""
+    solutions: List[str] = Field(description="推荐的技术操作步骤列表")
+    results: List[str] = Field(description="应用这些解决方案后的预期或观察结果")
 
 def format_messages_to_context(messages: List[Message]) -> str:
     role_map = {
@@ -25,57 +38,55 @@ def format_messages_to_context(messages: List[Message]) -> str:
         f"{role_map[msg.role]}: {msg.content}" for msg in messages
     )
 
-
-@router.post("/report/generation",tags=["report"], summary="Generate Elevator Maintenance Report")
-def report_generation(
-        request: ChatRequest,
-):
+@router.post("/report/generation", tags=["report"], summary="生成电梯维护报告")
+def report_generation(request: ChatRequest):
     """
-    generate elevator maintanence report
+    生成电梯维护报告
     """
-
-    # load data
-    base_path = Path("data/")
-
-    ticket = get_ticket_by_id(request.session_id)
-
-    qa_memory = store[request.session_id].chat_memory.messages
-    messages = convert_all_messages(qa_memory)
-    messages_context = format_messages_to_context(messages)
-
-    with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
-        manual_fragments_data = json.load(f)
-
-    # construct Prompt
-    structured_prompt = f"""
-    You are now an experienced elevator maintenance AI assistant. 
-    Below is the previous fixing conversation between technician and AI assistant:
-    {messages_context}
-    
-    Based on the following information, 
-    please generate a report for the current issue. 
-    The ticket file represents the current issue that are facing. The output should be well-structured, 
-    clearly highlight solution procedures, and refer to the manual references and common pitfalls.
-
-    Ticket Code Information:
-    {ticket}
-
-    Equipment Manual Excerpts:
-    {json.dumps(manual_fragments_data, indent=2)}
-
-    DO NOT GENERATE the report over 1000 tokens! 
-    The report must follow **strict JSON format**, and should contain only the following two top-level fields:
-- "solutions": a concise list of recommended technical actions.
-- "results": a summary of expected or observed outcomes from applying these solutions.
-    """
-    # call LangChain Chat API
     try:
-        response = lang_chat(ChatRequest(
-            messages=[Message(role="user", content=structured_prompt)],
-            session_id=request.session_id
-        ))
+        # 初始化Google模型
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash-8b",
+            temperature=0,
+            max_retries=2
+        )
+        structured_llm = llm.with_structured_output(MaintenanceReport)
+
+        # 加载数据
+        base_path = Path("data/")
+        ticket_service = TicketService()
+        ticket = ticket_service.get_ticket_by_id(request.session_id)
+        qa_memory = store[request.session_id].chat_memory.messages
+        messages = convert_all_messages(qa_memory)
+        messages_context = format_messages_to_context(messages)
+
+        with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
+            manual_fragments_data = json.load(f)
+
+        # 构建提示词
+        prompt = f"""
+        You are an experienced elevator maintenance AI assistant.
+        Below is the conversation between the technician and AI assistant:
+        {messages_context}
+        
+        Based on the following information, please generate a report for the current issue.
+        The ticket information represents the current problem. The output should be well-structured,
+        highlighting solution steps and referencing manual excerpts and common pitfalls.
+
+        Ticket Information:
+        {ticket}
+
+        Equipment Manual Excerpts:
+        {json.dumps(manual_fragments_data, indent=2)}
+
+        Please generate a concise maintenance report containing:
+        1. A list of recommended technical operation steps
+        2. Expected or observed outcomes from applying these solutions
+        """
+
+        # 调用模型获取结构化输出
+        response = structured_llm.invoke(prompt)
+        return response
 
     except Exception as e:
-        return {"error": f"LLM call error：{str(e)}"}
-
-    return response
+        return {"error": f"生成报告时出错：{str(e)}"}
