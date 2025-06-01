@@ -3,7 +3,7 @@
 Our project is an AI-powered field service assistant designed to support elevator technicians across the full maintenance cycle. It integrates ticket data, service records, manuals, and telemetry signals to provide real-time troubleshooting recommendations, detects anomalous sensor data, offers voice-guided repair support, and generates structured incident reports. Key features include a multi-agent architecture and knowledge-grounded LLM responses. It enables end-to-end workflow automation — from ticket pick-up to final report generation to significantly improving efficiency, consistency, and technician experience on-site.
 ## Architecture Overview
 smart-field-service-ai/
-├── data/                    # Raw data: tickets, logs, manuals, database
+├── data/                    # Raw data: tickets, logs, manuals, database    
 ├── knowledge_base/         # Retrieval logic using LangChain vector store
 ├── output/                 # AI-generated suggestions and markdown reports
 ├── server/                 # Backend logic (FastAPI)
