@@ -12,8 +12,9 @@ The system uses a **multi-agent architecture** and **knowledge-grounded LLM resp
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 smart-field-service-ai/
+
 ├── data/ # Raw data: tickets, logs, manuals, database
 
 ├── knowledge_base/ # LangChain vector store + retrieval logic
@@ -43,7 +44,7 @@ smart-field-service-ai/
 
 ---
 
-## ⚙️ Architecture Summary
+##  Architecture Summary
 
 - **Backend** *(this repository)*: Handles ticket management, AI-powered suggestions, and report generation using FastAPI + LangChain.
 - **Frontend** *(in [fix-wise](https://github.com/your-org/fix-wise))*: Displays tickets, statuses, reports, and chat interfaces for field technicians.
@@ -51,7 +52,7 @@ smart-field-service-ai/
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 | Layer        | Technology                  |
 |--------------|-----------------------------|
@@ -62,7 +63,7 @@ smart-field-service-ai/
 
 ---
 
-## 🧪 Sample Data: `fix-wise.db`
+## Sample Data: `fix-wise.db`
 
 This SQLite database supports AI-driven troubleshooting by integrating tickets and a vectorized manual knowledge base.
 
@@ -79,7 +80,7 @@ This SQLite database supports AI-driven troubleshooting by integrating tickets a
 
 ---
 
-## 🛠️ Development Tips
+## Development Tips
 
 - Add your Gemini API key to a `.env` file:
   ```env
