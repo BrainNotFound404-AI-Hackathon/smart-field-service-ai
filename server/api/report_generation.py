@@ -25,8 +25,8 @@ router = APIRouter()
 
 class MaintenanceReport(BaseModel):
     """维护报告结构"""
-    solutions: List[str] = Field(description="推荐的技术操作步骤列表")
-    results: List[str] = Field(description="应用这些解决方案后的预期或观察结果")
+    solutions: str = Field(description="推荐的技术操作步骤列表")
+    results: str = Field(description="应用这些解决方案后的预期或观察结果")
 
 def format_messages_to_context(messages: List[Message]) -> str:
     role_map = {
