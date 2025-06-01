@@ -56,9 +56,12 @@ def report_generation(request: ChatRequest):
         base_path = Path("data/")
         ticket_service = TicketService()
         ticket = ticket_service.get_ticket_by_id(request.session_id)
-        qa_memory = store[request.session_id].chat_memory.messages
-        messages = convert_all_messages(qa_memory)
-        messages_context = format_messages_to_context(messages)
+        # 获取会话中的聊天记录
+        messages_context = ""
+        if request.session_id in store:
+            qa_memory = store[request.session_id].chat_memory.messages
+            messages = convert_all_messages(qa_memory)
+            messages_context = format_messages_to_context(messages)
 
         with open(base_path / "manual_fragments.json", "r", encoding="utf-8") as f:
             manual_fragments_data = json.load(f)
@@ -78,7 +81,8 @@ def report_generation(request: ChatRequest):
 
         Equipment Manual Excerpts:
         {json.dumps(manual_fragments_data, indent=2)}
-
+        
+        DO NOT ouptput the report over 1000 tokens
         Please generate a concise maintenance report containing:
         1. A list of recommended technical operation steps
         2. Expected or observed outcomes from applying these solutions
