@@ -23,19 +23,19 @@ smart-field-service-ai/
 
 ├── server/ # Backend logic (FastAPI)
 
-│ ├── api/ # REST API routes
+  │ ├── api/ # REST API routes
 
-│ ├── database/ # SQLite schema + operations
+  │ ├── database/ # SQLite schema + operations
 
-│ ├── model/ # Pydantic schemas (Ticket, Response)
+  │ ├── model/ # Pydantic schemas (Ticket, Response)
 
-│ ├── service/ # Business logic layer
+  │ ├── service/ # Business logic layer
 
-│ ├── run_service.py # FastAPI entry point
+  │ ├── run_service.py # FastAPI entry point
 
-│ ├── agent.py # LangChain agent logic
+  │ ├── agent.py # LangChain agent logic
 
-├── frontend/ # (Optional) Frontend app (e.g., React/Vue)
+├── frontend/ # (not in this project) Frontend app
 
 ├── requirements.txt # Python dependencies
 
